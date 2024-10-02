@@ -21,7 +21,7 @@ print(image_data)
 print(image_data.shape)
 
 # Create an image of a region of the data
-section1 = image_data[4000:4300, 3990:4290]
+section1 = image_data[5000:5300, 4990:5290]
 
 mean, median, std = sigma_clipped_stats(section1, sigma=3.0)
 print((mean, median, std))
@@ -52,8 +52,8 @@ plt.show()
 
 # Create a mask to not consider the too bright sources
 mask = np.zeros(section1.shape, dtype=bool)
-mask[170:195, 150:175] = True
-mask[25:150, 25:110] = True
+mask[220:230, 80:110] = True
+mask[80:130, 240:300] = True
 
 sources = daofind(section1 - median, mask=mask)
 xpix = sources['xcentroid']
