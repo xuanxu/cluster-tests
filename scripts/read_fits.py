@@ -13,7 +13,6 @@ fits_filename = 'hlsp_hugs_hst_wfc3-uvis_ngc6254_f275w_v1_stack-0790s.fits'
 
 fits_file_path = join(dirname(__file__), fits_directory, fits_filename)
 
-
 # Read the data
 fits_file = fits.open(fits_file_path)
 
@@ -24,15 +23,16 @@ print(image_data.shape)
 # Create an image of a region of the data
 section1 = image_data[4000:4300, 3990:4290]
 
+mean, median, std = sigma_clipped_stats(section1, sigma=3.0)
+print((mean, median, std))
+
 plt.figure()
 plt.imshow(section1, origin='lower', norm=LogNorm(), cmap='Greys')
 plt.colorbar()
 plt.show()
 
-# Detect sources in the image
-mean, median, std = sigma_clipped_stats(section1, sigma=3.0)
-print((mean, median, std))
 
+# Detect sources in the image
 daofind = DAOStarFinder(fwhm=3.0, threshold=5.*std)
 
 sources = daofind(section1 - median)
@@ -53,7 +53,7 @@ plt.show()
 # Create a mask to not consider the too bright sources
 mask = np.zeros(section1.shape, dtype=bool)
 mask[170:195, 150:175] = True
-
+mask[25:150, 25:110] = True
 
 sources = daofind(section1 - median, mask=mask)
 xpix = sources['xcentroid']
