@@ -1,13 +1,13 @@
 from os.path import dirname, join
+from datetime import datetime
+import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from astropy.stats import sigma_clipped_stats
 from photutils.detection import DAOStarFinder
 from photutils.aperture import CircularAperture, CircularAnnulus, ApertureStats, aperture_photometry
-import numpy as np
 from acstools import acszpt
-from datetime import datetime
 
 fits_directory = '../data/'
 fits_filename = 'hlsp_hugs_hst_wfc3-uvis_ngc6254_f275w_v1_stack-0790s.fits'
@@ -80,7 +80,7 @@ plt.colorbar()
 plt.show()
 
 aperture_stats = ApertureStats(section1, annulus_aperture)
-background_mean = aperture_stats.mean
+background_mean = aperture_stats.mean 
 aperture_area = apertures.area_overlap(section1)
 total_background = background_mean * aperture_area
 
@@ -106,7 +106,7 @@ for valid_instrument in ['WFC', 'HRC', 'SBC']:
         instrument_formatted = valid_instrument
         break
 
-date_obs_formatted = datetime.datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d')
+date_obs_formatted = datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d')
 filter_name_formatted = filter_name.strip()
 
 print(instrument_formatted, filter_name_formatted, date_obs_formatted)
