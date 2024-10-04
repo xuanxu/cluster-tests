@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from astropy.stats import sigma_clipped_stats
 from photutils.detection import DAOStarFinder
-from photutils.aperture import CircularAperture
+from photutils.aperture import CircularAperture, CircularAnnulus, ApertureStats, aperture_photometry
 import numpy as np
+from acstools import acszpt
+from datetime import datetime
 
 fits_directory = '../data/'
 fits_filename = 'hlsp_hugs_hst_wfc3-uvis_ngc6254_f275w_v1_stack-0790s.fits'
@@ -64,3 +66,52 @@ plt.imshow(section1, origin='lower', norm=LogNorm(), cmap='Greys', interpolation
 apertures.plot(color='red', lw=1.5, alpha=0.5)
 plt.colorbar()
 plt.show()
+
+# Aperture photometry
+print(apertures)
+
+annulus_aperture = CircularAnnulus(positions, r_in=10.0, r_out=15.0)
+
+plt.figure()
+plt.imshow(section1, origin='lower', norm=LogNorm(), cmap='Greys', interpolation='nearest')
+apertures.plot(color='red', lw=1.5, alpha=0.5)
+annulus_aperture.plot(color='green', lw=1.5, alpha=0.5)
+plt.colorbar()
+plt.show()
+
+aperture_stats = ApertureStats(section1, annulus_aperture)
+background_mean = aperture_stats.mean
+aperture_area = apertures.area_overlap(section1)
+total_background = background_mean * aperture_area
+
+star_data = aperture_photometry(section1, apertures)
+
+star_data['total_background'] = total_background
+
+for col in star_data.colnames:
+    star_data[col].info.format = '%.8g'
+
+star_data.pprint(max_width=-1)
+
+# Calculate Magnitudes: M = Mzero - 2.5 * log10((flux - background_radiation)/exposure_time)
+instrument = fits_file[0].header['INSTRUME']
+filter_name = fits_file[0].header['FILTER']
+date_obs = fits_file[0].header['DATE-OBS']
+
+print(instrument, filter_name, date_obs)
+
+# Allowed detectors: ['WFC', 'HRC', 'SBC']
+for valid_instrument in ['WFC', 'HRC', 'SBC']:
+    if valid_instrument in instrument:
+        instrument_formatted = valid_instrument
+        break
+
+date_obs_formatted = datetime.datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d')
+filter_name_formatted = filter_name.strip()
+
+print(instrument_formatted, filter_name_formatted, date_obs_formatted)
+
+zpt_table = acszpt.Query(date=date_obs_formatted, detector=instrument_formatted).fetch()
+filter_zpt = acszpt.Query(date=date_obs_formatted, detector=instrument_formatted, filt='F775W').fetch()
+
+print(filter_zpt)
