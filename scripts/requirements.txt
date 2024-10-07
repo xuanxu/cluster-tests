@@ -2,3 +2,4 @@ astropy
 astroquery
 matplotlib
 photutils
+acstools
