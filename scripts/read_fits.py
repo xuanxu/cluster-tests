@@ -94,11 +94,18 @@ for col in star_data.colnames:
 star_data.pprint(max_width=-1)
 
 # Calculate Magnitudes: M = Mzero - 2.5 * log10((flux - background_radiation)/exposure_time)
+
+# We already have the flux, we need to get the Mzero and the exposure time.
+# These two parameters depend on the instrument, so first we need to get the instrument and the filter used.
+# We can get the Mzero using the acszpt module, which queries the zero points for the ACS instrument.
+# The exposure time is in the FITS header.
+
 instrument = fits_file[0].header['INSTRUME']
 filter_name = fits_file[0].header['FILTER']
 date_obs = fits_file[0].header['DATE-OBS']
+exposure_time = fits_file[0].header['EXPTIME']
 
-print(instrument, filter_name, date_obs)
+print(instrument, filter_name, date_obs, exposure_time)
 
 # Allowed detectors: ['WFC', 'HRC', 'SBC']
 for valid_instrument in ['WFC', 'HRC', 'SBC']:
@@ -115,3 +122,18 @@ zpt_table = acszpt.Query(date=date_obs_formatted, detector=instrument_formatted)
 filter_zpt = acszpt.Query(date=date_obs_formatted, detector=instrument_formatted, filt='F775W').fetch()
 
 print(filter_zpt)
+magnitude_zero_point = filter_zpt['ABmag'][0].value
+print(magnitude_zero_point)
+
+
+# Calculate the magnitudes
+import math
+magnitudes = []
+
+for star_line in star_data:
+    magnitude_star = magnitude_zero_point - 2.5 * math.log10(abs(star_line['aperture_sum'] - star_line['total_background'])/exposure_time)
+    magnitudes.append(magnitude_star)
+
+star_data['magnitude'] = magnitudes
+
+star_data.pprint(max_lines=-1, max_width=-1)
