@@ -8,6 +8,7 @@ from astropy.stats import sigma_clipped_stats
 from photutils.detection import DAOStarFinder
 from photutils.aperture import CircularAperture, CircularAnnulus, ApertureStats, aperture_photometry
 from acstools import acszpt
+import math
 
 fits_directory = '../data/'
 fits_filename = 'hlsp_hugs_hst_wfc3-uvis_ngc6254_f275w_v1_stack-0790s.fits'
@@ -125,9 +126,7 @@ print(filter_zpt)
 magnitude_zero_point = filter_zpt['ABmag'][0].value
 print(magnitude_zero_point)
 
-
 # Calculate the magnitudes
-import math
 magnitudes = []
 
 for star_line in star_data:
