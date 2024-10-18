@@ -34,7 +34,6 @@ plt.imshow(section1, origin='lower', norm=LogNorm(), cmap='Greys')
 plt.colorbar()
 plt.show()
 
-
 # Detect sources in the image
 daofind = DAOStarFinder(fwhm=3.0, threshold=5.*std)
 
