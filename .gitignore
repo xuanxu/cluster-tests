@@ -70,3 +70,6 @@ venv.bak/
 
 # Do not commit big data files
 /data
+
+# Do not commit external dependencies and scripts
+/libext
